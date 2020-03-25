@@ -13,9 +13,9 @@ class Board:
         self.properties = properties
 
 class Player:
-    def __init__(self, cash, properties):
+    def __init__(self, cash):
         self.cash = cash
-        self.properties = properties
+        self.properties = []
 
 
 '''Given a board, returns all the possible combinations of properties'''
@@ -23,7 +23,7 @@ def find_all_combos(board: Board):
     return [[]]
 
 '''Finds all viable combinations of cash and property for a given player on a given board'''
-def generate_training_input(board: Board, player: Player):
+def generate_training_input(combos, player: Player):
     return [{'cash': 0,
              'properties': [Property(0, 'blue')]
              }]
