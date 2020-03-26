@@ -21,10 +21,14 @@ class Player:
 
 def find_all_combos(board: Board):
     """Given a board, returns all the possible combinations of properties"""
-    return set([frozenset([Property(0, 'blue')])])
+    properties = board.properties
+    combos = set()
+    for set_size in range(0, len(properties) + 1):
+        for combo in itertools.combinations(properties, set_size):
+            combos.add(frozenset(combo))
+    return combos
 
-def generate_training_input(combos, player: Player):
+
+def generate_training_input(combos, cash):
     """Finds all viable combinations of cash and property for a given player on a given board"""
-    return [{'cash': 0,
-             'properties': [Property(0, 'blue')]
-             }]
+
