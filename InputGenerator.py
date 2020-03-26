@@ -16,6 +16,7 @@ class Board:
     def __init__(self, properties):
         self.properties = properties
         self.colors = Counter()
+        self.color_list = []
 
     def get_colors(self):
         colors = self.colors
@@ -25,6 +26,10 @@ class Board:
 
         return colors
 
+    def get_color_list(self):
+        if len(self.color_list) == 0:
+            self.color_list = self.get_colors().keys()
+        return self.color_list
 
 class Player:
     def __init__(self, cash):

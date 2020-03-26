@@ -18,6 +18,7 @@ props1 = [pb1, pb2]
 props2 = [pb1]
 props3 = [pb1, pb2, py1, pr1]
 props4 = [pb1, pb2, pb3, py1, py2, py3, pr1, pr2, pr3]
+props4_1 = [pb1, pb2, py1, py2]
 
 board1 = Board(props1)
 board2 = Board(props2)
@@ -30,6 +31,7 @@ class Test(TestCase):
         combo2 = {'cash': 100, 'properties': props2}
         combo3 = {'cash': 100, 'properties': props3}
         combo4 = {'cash': 100, 'properties': props4}
+        combo4_1 = {'cash': 100, 'properties': props4_1}
         output1 = [100, 1, 1]
         output2 = [100, 1]
         output3 = [100, 1, 1, 1, 0, 1, 0]
@@ -37,7 +39,11 @@ class Test(TestCase):
                    1, 1, 1,
                    1, 1, 1,
                    1, 1, 1]
-        self.assertListEqual(output1, read_board(combo1, board1))
-        self.assertListEqual(output2, read_board(combo2, board2))
-        self.assertListEqual(output3, read_board(combo3, board3))
-        self.assertListEqual(output4, read_board(combo4, board4))
+        output4_1 = [100,
+                     1, 1, 0,
+                     1, 1, 0,
+                     0, 0, 0]
+        self.assertEqual([output1], read_board([combo1], board1))
+        self.assertEqual([output2], read_board([combo2], board2))
+        self.assertEqual([output3], read_board([combo3], board3))
+        self.assertEqual([output4, output4_1], read_board([combo4, combo4_1], board4))
