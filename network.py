@@ -1,5 +1,14 @@
-def read_board(property_combos):
+from InputGenerator import Board, generate_training_input, find_all_combos, Player
+import numpy as np
+
+def read_board(combos, board: Board):
     """Given property cash combos from InputGenerator, return array datatype for learning"""
+    colors = board.get_colors()
+    breadth = len(colors)
+    depth = colors.most_common()[0][1]
+    data = []
+    for combo in combos:
+        mtx = np.zeros([depth, breadth], dtype=int)
     return []
 
 def evaluate_heuristic(input, output):
