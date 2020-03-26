@@ -30,5 +30,18 @@ def find_all_combos(board: Board):
 
 
 def generate_training_input(combos, cash):
-    """Finds all viable combinations of cash and property for a given player on a given board"""
-
+    """
+    Finds all viable combinations of cash and property for a given player on a given board
+    Assumes all viable combos are passed in"""
+    train_input = []
+    for combo in combos:
+        cost = 0
+        too_expensive = False
+        for prop in combo:
+            cost += prop.cost
+            if cost > cash:
+                too_expensive = True
+                break
+        if not too_expensive:
+            train_input.append({'cash': cash - cost, 'properties': combo})
+    return train_input
