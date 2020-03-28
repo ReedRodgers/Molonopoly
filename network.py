@@ -24,7 +24,7 @@ def read_board(combos, board: Board):
 
     return data
 
-def evaluate_heuristic(input, output):
+def evaluate_heuristic(input, board: Board):
     """return heuristic value of property cash combination"""
     return 0
 
