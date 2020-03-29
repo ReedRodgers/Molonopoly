@@ -24,9 +24,26 @@ def read_board(combos, board: Board):
 
     return data
 
+
+def evaluate_property(prop_set, board_count):
+    """Evaluates value of a set of properties given the total properties on the board"""
+    prop_counter = Counter()
+    prop_value = Counter()
+    for prop in prop_set:
+        prop_counter.update(prop.color)
+        prop_value.update({prop.color: prop.cost})
+    total_value = 0
+    for color in prop_value.keys():
+        if prop_counter[color] == board_count[color]:
+            prop_value.update({color: prop_value[color]})
+        total_value += prop_value[color]
+    return total_value
+
+
 def evaluate_heuristic(input, board: Board):
     """return heuristic value of property cash combination"""
-    return 0
+    property_value = evaluate_property(input['properties'], board.get_colors())
+    return property_value
 
 
 def apply_heuristic(x_values):
