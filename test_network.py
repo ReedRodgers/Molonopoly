@@ -19,7 +19,9 @@ props1 = [pb1, pb2]
 props1_1 = [pb1, pr2]
 props2 = [pb1]
 props3 = [pb1, pb2, py1, pr1]
-props4 = [pb1, pb2, pb3, py1, py2, py3, pr1, pr2, pr3]
+props4 = [pb1, pb2, pb3,
+          py1, py2, py3,
+          pr1, pr2, pr3]
 props4_1 = [pb1, pb2, py1, py2]
 
 board1 = Board(props1)
@@ -83,4 +85,4 @@ class Test(TestCase):
         # The same amount of cash should be more valuable when the remaining property will complete a set than when it would not
         combo6_6 = {'cash': 100, 'properties': props1_1}
         combo6_7 = {'cash': 100, 'properties': props1}
-        self.assertGreater(evaluate_heuristic(combo6_6, board4), evaluate_heuristic(combo6_7, board4))
+        self.assertGreater(evaluate_heuristic(combo6_7, board4), evaluate_heuristic(combo6_6, board4))

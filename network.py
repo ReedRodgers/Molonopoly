@@ -1,6 +1,7 @@
 from InputGenerator import Board, generate_training_input, find_all_combos, Player
 import numpy as np
 from collections import Counter
+from copy import deepcopy
 
 def read_board(combos, board: Board):
     """Given property cash combos from InputGenerator, return array datatype for learning"""
@@ -40,10 +41,37 @@ def evaluate_property(prop_set, board_count):
     return total_value
 
 
+def evaluate_options(properties, cash, remaining_properties, color_distribution):
+    """Evaluates value of cash based on which properties could be purchased with it"""
+    value = 0  # Approximate value of each option evaluated so far
+    options = 0  # Number of options evaluated so far
+    can_buy = False
+
+    while len(remaining_properties) > 0:
+        prop = remaining_properties.pop()
+        if prop.cost > cash:
+            continue
+        can_buy = True
+        properties.append(prop)
+        v, o = evaluate_options(properties, cash - prop.cost, deepcopy(remaining_properties), color_distribution)
+        properties.pop()
+        value += v
+        options += o
+
+    if not can_buy:
+        value = evaluate_property(properties, color_distribution)
+        options = 1
+
+    return value, options
+
+
 def evaluate_heuristic(input, board: Board):
     """return heuristic value of property cash combination"""
-    property_value = evaluate_property(input['properties'], board.get_colors())
-    return property_value
+    owned_properties = input['properties']
+    property_value = evaluate_property(owned_properties, board.get_colors())
+    remaining_properties = set(board.properties) - set(owned_properties)
+    value, options = evaluate_options(owned_properties, input['cash'], remaining_properties, board.get_colors())
+    return property_value + value / options
 
 
 def apply_heuristic(x_values):
