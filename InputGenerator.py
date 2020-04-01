@@ -50,7 +50,8 @@ def find_all_combos(board: Board):
 def generate_training_input(combos, cash):
     """
     Finds all viable combinations of cash and property for a given player on a given board
-    Assumes all viable combos are passed in"""
+    Assumes all viable combos are passed in
+    """
     train_input = []
     for combo in combos:
         cost = 0
