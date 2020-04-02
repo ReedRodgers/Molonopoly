@@ -92,18 +92,26 @@ def apply_heuristic(x_values, board: Board):
 def loss(y_true, y_predict):
     return (y_true - y_predict)**2
 
+def accuracy(y_true, y_predict):
+    return 1/(y_true - y_predict) ** 2
+
 
 def train(property_combos, board: Board):
     """
     Entry point method to be called from main.
     Accepts property combinations, processes them, and trains the model
     """
+    combo_count = len(property_combos)
+    training = sample(range(combo_count), math.floor(combo_count*.75))
+    testing = list(set(range(combo_count)) - set(training))
+    training_combos = [property_combos[i] for i in training]
+    testing_combos = [property_combos[i] for i in testing]
 
+    x_train = read_board(training_combos, board)
+    y_train = apply_heuristic(training_combos, board)
 
-    x_values = read_board(property_combos, board)
-    y_values = apply_heuristic(property_combos, board)
-
-
+    x_test = read_board(testing_combos, board)
+    y_test = apply_heuristic(testing_combos, board)
 
     color_counts = board.get_colors()
     breadth = len(color_counts)
@@ -111,16 +119,17 @@ def train(property_combos, board: Board):
 
     model = tf.keras.models.Sequential([
         tf.keras.layers.Input(shape=(breadth * depth + 1,)),
+        tf.keras.layers.Dense(breadth + depth, activation='relu'),
         tf.keras.layers.Dense(breadth + 1, activation='relu'),
         tf.keras.layers.Dense(1, activation='relu')
     ])
 
-    model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.1),
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=.05),
                   loss=loss,
-                  metrics=['accuracy']
+                  metrics=[accuracy]
                   )
 
-    model.fit(np.array(x_values), np.array(y_values), epochs=20, validation_data=(np.array(x_values), np.array(y_values)))
+    model.fit(np.array(x_train), np.array(y_train), epochs=25, validation_data=(np.array(x_test), np.array(y_test)))
 
     return model
 
