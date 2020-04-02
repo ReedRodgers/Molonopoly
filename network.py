@@ -3,6 +3,8 @@ import numpy as np
 from collections import Counter
 from copy import deepcopy
 import tensorflow as tf
+from random import sample
+import math
 
 def read_board(combos, board: Board):
     """Given property cash combos from InputGenerator, return array datatype for learning"""
@@ -96,15 +98,19 @@ def train(property_combos, board: Board):
     Entry point method to be called from main.
     Accepts property combinations, processes them, and trains the model
     """
+
+
     x_values = read_board(property_combos, board)
     y_values = apply_heuristic(property_combos, board)
+
+
 
     color_counts = board.get_colors()
     breadth = len(color_counts)
     depth = color_counts.most_common()[0][1]
 
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(breadth * depth + 1, activation='relu'),
+        tf.keras.layers.Input(shape=(breadth * depth + 1,)),
         tf.keras.layers.Dense(breadth + 1, activation='relu'),
         tf.keras.layers.Dense(1, activation='relu')
     ])
@@ -114,7 +120,7 @@ def train(property_combos, board: Board):
                   metrics=['accuracy']
                   )
 
-    model.fit(x_values, y_values, epochs=5, validation_data=(x_values, y_values));
+    model.fit(np.array(x_values), np.array(y_values), epochs=20, validation_data=(np.array(x_values), np.array(y_values)))
 
     return model
 
