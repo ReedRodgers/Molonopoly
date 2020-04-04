@@ -3,21 +3,36 @@ import network
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    pb1 = Property(100, 'b')
-    pb2 = Property(100, 'b')
-    pb3 = Property(100, 'b')
+    prop_val = 100
+    pb1 = Property(prop_val, 'b')
+    pb2 = Property(prop_val, 'b')
+    pb3 = Property(prop_val, 'b')
 
-    py1 = Property(100, 'y')
-    py2 = Property(100, 'y')
-    py3 = Property(100, 'y')
+    py1 = Property(prop_val, 'y')
+    py2 = Property(prop_val, 'y')
+    py3 = Property(prop_val, 'y')
 
-    pr1 = Property(100, 'r')
-    pr2 = Property(100, 'r')
-    pr3 = Property(100, 'r')
+    pr1 = Property(prop_val, 'r')
+    pr2 = Property(prop_val, 'r')
+    pr3 = Property(prop_val, 'r')
+
+    pg1 = Property(prop_val, 'g')
+    pg2 = Property(prop_val, 'g')
+    pg3 = Property(prop_val, 'g')
+
+
+    pp1 = Property(200, 'p')
+    pp2 = Property(200, 'p')
+
+    pc1 = Property(50, 'c')
+    pc2 = Property(50, 'c')
+
 
     props = [pb1, pb2, pb3,
              py1, py2, py3,
-             pr1, pr2, pr3]
+             pr1, pr2, pr3,
+             pg1, pg2, pg3,
+             pp1, pp2, pc1, pc2]
 
     board = Board(props)
     player1 = Player(500)

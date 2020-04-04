@@ -93,7 +93,7 @@ def loss(y_true, y_predict):
     return (y_true - y_predict)**2
 
 def accuracy(y_true, y_predict):
-    return 1/(y_true - y_predict) ** 2
+    return math.log(1/abs(y_true - y_predict), 10)
 
 
 def train(property_combos, board: Board):
@@ -124,7 +124,7 @@ def train(property_combos, board: Board):
         tf.keras.layers.Dense(1, activation='relu')
     ])
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=.05),
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=.1),
                   loss=loss,
                   metrics=[accuracy]
                   )
