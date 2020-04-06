@@ -1,0 +1,4 @@
+## To Do (Ishan, April 6th)
+- Add rent multiplier mechanism
+- And parameters for timed game
+- Add circular loop for rolling
