@@ -4,6 +4,12 @@ Step 1: evaluate the value of different combinations of properties
 """
 from random import randint
 
+
+rent_check = {'Purple': 2, 'Light-Blue': 3, 'Violet': 3,
+              'Orange': 3, 'Yellow': 3, 'Red': 3,
+              'Dark-Green': 3, 'Dark-Blue': 2}
+
+
 class Square:
     def __init__(self):
         self.colour = "BLACK"
@@ -30,6 +36,19 @@ class Property(Square):
 
     def __repr__(self):
         return f'{self.name}'
+
+    def determine_rent(self, landing_player: Player):
+        if self.owner is landing_player:  # Moot, but check regardless
+            return 0
+        else:
+            counter = 0
+            for prop in self.owner.properties:
+                if prop.colour == self.colour:
+                    counter += 1
+            if counter == rent_check[self.colour]:
+                return self.rent * 2
+            else:
+                return self.rent
 
 
 class Board:
@@ -70,4 +89,14 @@ class Player:
         self.properties.append(some_property)
         some_property.owner = self
 
+    def pay_rent(self, fee: int):
+        self.cash -= fee
 
+    def valuate(self):
+        # Account for cash
+        net_worth = self.cash
+
+        # Account for property value(s)
+        for prop in self.properties:
+            net_worth += prop.cost
+        return net_worth

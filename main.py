@@ -2,6 +2,7 @@ import InputGenerator
 import network
 from queue import Queue as queue
 
+
 def read_properties():
     """Generator function to read from csv"""
     with open("property_list.csv", "r", encoding="utf-8-sig") as f:
@@ -35,16 +36,31 @@ def initialize_stage2_game(player_count=1):
     return property_list, board, players
 
 
+def buy_property(player: InputGenerator.Player, property: InputGenerator.Property, rent: int):
+    """Put the Network here"""
+    if rent > 20:
+        return True
+    else:
+        return False
+
+
 def stage2_transactions(player: InputGenerator.Player, property: InputGenerator.Property):
     """ In stage 2, the player can either buy a property, or will have to pay rent for it."""
 
     if not property.owner:
-        pass
-        # Make purchasing decision(s)
+
+        # Determine amount of rent payable
+        payable_rent = property.determine_rent(player)
+
+        # Determine whether or not to buy the property
+        if buy_property(player, property, rent=payable_rent):
+            player.purchase(property)  # Buy the property if NN says you should buy it
+        else:
+            player.pay_rent(fee=payable_rent)  # Pay the rent if NN says it's not worth buying
     return None
 
 
-def run_game(game_board:InputGenerator.Board, players: queue, rounds_per_game=25):
+def run_game(game_board: InputGenerator.Board, players: queue, rounds_per_game=25):
     turns = 0
     while turns < rounds_per_game * players.qsize():
         # Who's turn is it?
@@ -75,5 +91,12 @@ if __name__ == '__main__':
     run_game(new_board, players=player_list)
 
     # Determine winner(s)
-
+    max_value = 0
+    for _ in range(player_list.qsize()):
+        player = player_list.get()
+        worth = player.valuate()
+        if worth > max_value:
+            max_value = worth
+            winner = player
+    print(f'And the winner is: {player}, who finished the game with: ${player.valuate()}')
 
