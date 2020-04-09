@@ -1,5 +1,6 @@
 from unittest import TestCase
 from InputGenerator import Board, Player, Property, find_all_combos, generate_training_input
+from collections import Counter
 
 p_expensive = Property(105, 'blue')
 p1 = Property(100, 'yellow')
@@ -25,11 +26,11 @@ class TestFindAllCombos(TestCase):
         properties = [p1, p2, p3]
         board = Board(properties)
         combos = find_all_combos(board)
-        manual_combos ={frozenset([]), frozenset([p1]), frozenset([p2]), frozenset([p3]),
-                            frozenset([p1, p2]),
-                            frozenset([p1, p3]),
-                            frozenset([p2, p3]),
-                            frozenset([p1, p2, p3])}
+        manual_combos = {frozenset([]), frozenset([p1]), frozenset([p2]), frozenset([p3]),
+                         frozenset([p1, p2]),
+                         frozenset([p1, p3]),
+                         frozenset([p2, p3]),
+                         frozenset([p1, p2, p3])}
         self.assertSetEqual(combos, manual_combos)
 
 
@@ -37,7 +38,7 @@ class TestTrainingInput(TestCase):
 
     def test_non_negative_cash(self):
         """should return empty set if cash too low"""
-        combos ={frozenset([p_cheap, p1]), frozenset([p_cheap, p_free]), frozenset([p1])}
+        combos = {frozenset([p_cheap, p1]), frozenset([p_cheap, p_free]), frozenset([p1])}
         viable_combos = generate_training_input(combos, poor_player.cash)
         self.assertListEqual([], viable_combos)
 
@@ -71,3 +72,15 @@ class TestTrainingInput(TestCase):
                   {'cash': 198, 'properties': s2}]
 
         self.assertListEqual(viable_combos, result)
+
+
+class TestBoard(TestCase):
+    def test_get_colors(self):
+        b1 = Board([p1])  # Single property
+        self.assertEqual(Counter({p1.color: 1}), b1.get_colors())
+        b2 = Board([p1, p2])  # Multiple properties, single colors
+        self.assertEqual(Counter({p1.color: 1, p2.color: 1}), b2.get_colors())
+        b3 = Board([p3, p_cheap])  # Single color, multiple properties
+        self.assertEqual(Counter({p3.color: 2}), b3.get_colors())
+        b4 = Board([p3, p_cheap, p_free, p_expensive])  # Multiple color, multiple properties
+        self.assertEqual(Counter({p3.color: 2, p_free.color: 1, p_expensive.color: 1}), b4.get_colors())

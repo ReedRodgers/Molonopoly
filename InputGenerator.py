@@ -1,17 +1,35 @@
 import itertools
+from collections import Counter
 '''
 This file is responsible for generating input for the NN.
 Step 1: evaluate the value of different combinations of properties
 '''
+
 
 class Property:
     def __init__(self, cost, color):
         self.cost = cost
         self.color = color
 
+
 class Board:
     def __init__(self, properties):
         self.properties = properties
+        self.colors = Counter()
+        self.color_list = []
+
+    def get_colors(self):
+        colors = self.colors
+        if len(colors) == 0:
+            for prop in self.properties:
+                colors.update([prop.color])
+
+        return colors
+
+    def get_color_list(self):
+        if len(self.color_list) == 0:
+            self.color_list = self.get_colors().keys()
+        return self.color_list
 
 class Player:
     def __init__(self, cash):
@@ -32,7 +50,8 @@ def find_all_combos(board: Board):
 def generate_training_input(combos, cash):
     """
     Finds all viable combinations of cash and property for a given player on a given board
-    Assumes all viable combos are passed in"""
+    Assumes all viable combos are passed in
+    """
     train_input = []
     for combo in combos:
         cost = 0
