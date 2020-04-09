@@ -39,24 +39,22 @@ class Property(Square):
         return f'{self.name}'
 
     def determine_rent(self, landing_player):
-        # if the property isn't owned by anyone, rent would be normal priced
+        # if the property isn't owned by anyone, there is no rent
         if not self.owner:
-            return self.rent
+            return 0
         elif self.owner is landing_player:  # if property is owned by the player who lands on it, no rent.
-            """ This may be pointless- this should never arise given the logic of stage2_transactions()"""
+            #  This may be pointless- this should never arise given the logic of stage2_transactions()
+            #  But it's still good practice to include this check in case that logic changes
             return 0
         else:  # property is owned by the opponent
-            if not self.owner.properties:  # owner has no properties
-                return self.rent
+            counter = 0
+            for prop in self.owner.properties:
+                if prop.colour == self.colour:
+                    counter += 1
+            if counter == rent_check[self.colour]:
+                return self.rent * 2
             else:
-                counter = 0
-                for prop in self.owner.properties:
-                    if prop.colour == self.colour:
-                        counter += 1
-                if counter == rent_check[self.colour]:
-                    return self.rent * 2
-                else:
-                    return self.rent
+                return self.rent
 
 
 class Board:
