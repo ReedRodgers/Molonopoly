@@ -23,11 +23,12 @@ class Square:
 
 
 class Property(Square):
-    def __init__(self, cost: int, colour: str, rent: int, name: str):
+    def __init__(self, cost: int, colour: str, rent: int, name: str, index: int):
         self.cost = int(cost)
         self.colour = colour
         self.rent = int(rent)
         self.name = name
+        self.index = index
         self.owner = False
         self.players_present = []
 
@@ -61,7 +62,13 @@ class Property(Square):
 class Board:
     def __init__(self, properties):
         self.full_board = properties  # List with objects of type: Property
-        self.property_count = len(properties)  # Store this variable so that it's not evaluated multiple times.
+
+        # Store these variables so that they're not evaluated multiple times
+        self.property_count = len(properties)
+        self.unowned = dict()
+
+        for idx, _ in enumerate(self.full_board):
+            self.unowned[idx] = True
 
     def debug(self):
         """Print out every single square on the board, if it's owned, if there's a player on that square"""
@@ -70,7 +77,7 @@ class Board:
 
     def roll(self, player):
         current_position = player.position
-        dice_roll = randint(0, 7)
+        dice_roll = randint(1, 7)
 
         # Use modulus to ensure circular behaviour
         new_position = (current_position + dice_roll) % self.property_count
@@ -83,6 +90,10 @@ class Board:
         self.full_board[new_position].players_present.append(player)
 
         return new_position
+
+    def get_unowned_properties(self):
+        """ Abandoned because of unreasonable time complexity, even with the dictionary"""
+        pass
 
 
 class Player:
@@ -108,6 +119,16 @@ class Player:
         for prop in self.properties:
             net_worth += prop.cost
         return net_worth
+
+    def get_property_indices(self):
+        if not self.properties:
+            return []
+        else:
+            output = []
+            for p in self.properties:
+                output.append(int(p.index))
+            return output
+
 
     def __repr__(self):
         return f'{self.name}: ({self.cash}, {self.valuate()})'

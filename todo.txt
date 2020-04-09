@@ -1,3 +1,2 @@
-## To Do (Ishan, April 7th)
+## To Do (Ishan, April 9th)
 - Need to integrate NN with learning rule
-- Need to decide winner
