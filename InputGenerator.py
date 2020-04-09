@@ -3,7 +3,8 @@ This file is responsible for generating input for the NN.
 Step 1: evaluate the value of different combinations of properties
 """
 from random import randint
-
+from network import Network
+from collections import Counter
 
 rent_check = {'Purple': 2, 'Light-Blue': 3, 'Violet': 3,
               'Orange': 3, 'Yellow': 3, 'Red': 3,
@@ -58,34 +59,48 @@ class Property(Square):
 
 
 class Board:
-    def __init__(self, properties):
-        self.full_board = properties  # List with objects of type: Property
+    def __init__(self, properties, colour_list):
+        self.properties = properties  # List with objects of type: Property
 
         # Store these variables so that they're not evaluated multiple times
         self.property_count = len(properties)
-        self.unowned = dict()
+#        self.unowned = dict()
+        self.colour_counts = Counter()
+        self.colour_list = colour_list  # Stores ordered list of colours to maintain order for learning input
 
-        for idx, _ in enumerate(self.full_board):
-            self.unowned[idx] = True
+#         for idx, prop in enumerate(self.properties):
+#            self.unowned[idx] = True
+
+    def get_colour_count(self):
+        colors = self.colour_counts
+        if len(colors) == 0:
+            for prop in self.properties:
+                colors.update([prop.color])
+
+        return colors
+
+    def get_colour_list(self):
+        return self.color_list
+
 
     def debug(self):
         """Print out every single square on the board, if it's owned, if there's a player on that square"""
-        for square in self.full_board:
+        for square in self.properties:
             print(f'{square}; owner={square.owner}; players_present={square.players_present}')
 
     def roll(self, player):
         current_position = player.position
-        dice_roll = randint(1, 7)
+        dice_roll = randint(1, 7) + randint(1, 7)
 
         # Use modulus to ensure circular behaviour
         new_position = (current_position + dice_roll) % self.property_count
 
         # Remove player from old position
-        self.full_board[current_position].players_present.remove(player)
+        self.properties[current_position].players_present.remove(player)
 
         # Change player's position
         player.position = new_position
-        self.full_board[new_position].players_present.append(player)
+        self.properties[new_position].players_present.append(player)
 
         return new_position
 
@@ -95,11 +110,12 @@ class Board:
 
 
 class Player:
-    def __init__(self, cash, identifier):
+    def __init__(self, cash, identifier, net: Network):
         self.name = identifier
         self.cash = int(cash)
         self.properties = []   # Perhaps this should be a dictionary, with 4 keys corresponding to the colours
         self.position = 0
+        self.network = net
 
     def purchase(self, some_property: Property):
         self.cash -= some_property.cost
@@ -127,6 +143,8 @@ class Player:
                 output.append(int(p.index))
             return output
 
+    def decide_purchase(self, others, board):
+        self.network.predict(others, self, board)
 
     def __repr__(self):
         return f'{self.name}: ({self.cash}, {self.valuate()})'

@@ -14,33 +14,38 @@ def read_properties():
 
 def import_properties():
     property_list = []
+    colour_list = []
     data = read_properties()
+    colour = ''
     for index, entry in enumerate(data):
         name, price, rent, col = entry.strip().split(",")
         property_list.append(InputGenerator.Property(name=name, cost=price, colour=col, rent=rent, index=index))
+        if colour != col:
+            colour = col
+            colour_list.append(col)
     return property_list
 
 
 def initialize_stage2_game(player_count=2):
     """ Initialize the entire board and first player, as defined in Stage 1"""
-
     # Generate property list
-    property_list = import_properties()
+    property_list, colour_list = import_properties()
 
     # Create board using the properties provided
-    board = InputGenerator.Board(property_list)
+    board = InputGenerator.Board(property_list, colour_list)
 
     # Spawn players with money, on the first tile of the board.
     players = queue()
     for i in range(player_count):
         new_player = InputGenerator.Player(cash=1500, identifier=f'Player{i + 1}')
         players.put(new_player)
-        board.full_board[0].players_present.append(new_player)
+        board.properties[0].players_present.append(new_player)
     return property_list, board, players
 
 
-def buy_property(player: InputGenerator.Player, property: InputGenerator.Property, rent: int):
+def buy_property(player: InputGenerator.Player, others, property: InputGenerator.Property, board):
     """Put the Network here"""
+    player.decide_purchase(others, property, board)
     if choice([0, 1]) and player.cash > property.cost:
         return True
     else:
@@ -93,7 +98,7 @@ def run_game(file_handle, game_board: InputGenerator.Board, players: queue, roun
 
         # Roll the dice, and move the player accordingly
         current_position = game_board.roll(current_player)
-        current_property = game_board.full_board[current_position]
+        current_property = game_board.properties[current_position]
 
         # Make transaction decisions
         stage2_transactions(player=current_player, property=current_property)
