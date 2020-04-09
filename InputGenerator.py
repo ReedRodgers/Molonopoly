@@ -23,10 +23,10 @@ class Square:
 
 
 class Property(Square):
-    def __init__(self, cost, colour, rent, name):
-        self.cost = cost
+    def __init__(self, cost: int, colour: str, rent: int, name: str):
+        self.cost = int(cost)
         self.colour = colour
-        self.rent = rent
+        self.rent = int(rent)
         self.name = name
         self.owner = False
         self.players_present = []
@@ -37,18 +37,25 @@ class Property(Square):
     def __repr__(self):
         return f'{self.name}'
 
-    def determine_rent(self, landing_player: Player):
-        if self.owner is landing_player:  # Moot, but check regardless
+    def determine_rent(self, landing_player):
+        # if the property isn't owned by anyone, rent would be normal priced
+        if not self.owner:
+            return self.rent
+        elif self.owner is landing_player:  # if property is owned by the player who lands on it, no rent.
+            """ This may be pointless- this should never arise given the logic of stage2_transactions()"""
             return 0
-        else:
-            counter = 0
-            for prop in self.owner.properties:
-                if prop.colour == self.colour:
-                    counter += 1
-            if counter == rent_check[self.colour]:
-                return self.rent * 2
-            else:
+        else:  # property is owned by the opponent
+            if not self.owner.properties:  # owner has no properties
                 return self.rent
+            else:
+                counter = 0
+                for prop in self.owner.properties:
+                    if prop.colour == self.colour:
+                        counter += 1
+                if counter == rent_check[self.colour]:
+                    return self.rent * 2
+                else:
+                    return self.rent
 
 
 class Board:
@@ -59,7 +66,7 @@ class Board:
     def debug(self):
         """Print out every single square on the board, if it's owned, if there's a player on that square"""
         for square in self.full_board:
-            print(f'{square}; owned={square.owned_by}; players_present={square.players_present}')
+            print(f'{square}; owner={square.owner}; players_present={square.players_present}')
 
     def roll(self, player):
         current_position = player.position
@@ -79,8 +86,9 @@ class Board:
 
 
 class Player:
-    def __init__(self, cash):
-        self.cash = cash
+    def __init__(self, cash, identifier):
+        self.name = identifier
+        self.cash = int(cash)
         self.properties = []   # Perhaps this should be a dictionary, with 4 keys corresponding to the colours
         self.position = 0
 
@@ -90,7 +98,7 @@ class Player:
         some_property.owner = self
 
     def pay_rent(self, fee: int):
-        self.cash -= fee
+        self.cash -= int(fee)
 
     def valuate(self):
         # Account for cash
@@ -100,3 +108,9 @@ class Player:
         for prop in self.properties:
             net_worth += prop.cost
         return net_worth
+
+    def __repr__(self):
+        return f'{self.name}: ({self.cash}, {self.valuate()})'
+
+    def __str__(self):
+        return f'{self.name}'
