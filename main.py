@@ -1,9 +1,11 @@
-import InputGenerator
-import network
+import Board
 from queue import Queue as queue
 from random import choice
 from time import time
 from uuid import uuid4
+
+import Player
+import Property
 
 
 def read_properties():
@@ -19,7 +21,7 @@ def import_properties():
     colour = ''
     for index, entry in enumerate(data):
         name, price, rent, col = entry.strip().split(",")
-        property_list.append(InputGenerator.Property(name=name, cost=price, colour=col, rent=rent, index=index))
+        property_list.append(Property.Property(name=name, cost=price, colour=col, rent=rent, index=index))
         if colour != col:
             colour = col
             colour_list.append(col)
@@ -32,18 +34,18 @@ def initialize_stage2_game(player_count=2):
     property_list, colour_list = import_properties()
 
     # Create board using the properties provided
-    board = InputGenerator.Board(property_list, colour_list)
+    board = Board.Board(property_list, colour_list)
 
     # Spawn players with money, on the first tile of the board.
     players = queue()
     for i in range(player_count):
-        new_player = InputGenerator.Player(cash=1500, identifier=f'Player{i + 1}')
+        new_player = Player.Player(cash=1500, identifier=f'Player{i + 1}')
         players.put(new_player)
         board.properties[0].players_present.append(new_player)
     return property_list, board, players
 
 
-def buy_property(player: InputGenerator.Player, others, property: InputGenerator.Property, board):
+def buy_property(player: Player.Player, others, property: Property.Property, board):
     """Put the Network here"""
     player.decide_purchase(others, property, board)
     if choice([0, 1]) and player.cash > property.cost:
@@ -52,11 +54,11 @@ def buy_property(player: InputGenerator.Player, others, property: InputGenerator
         return False
 
 
-def stage2_transactions(player: InputGenerator.Player, property: InputGenerator.Property):
+def stage2_transactions(player: Player.Player, property: Property.Property, board : Board.Board):
     """ In stage 2: there are two players """
 
     # Determine amount of payable rent
-    payable_rent = property.determine_rent(player)
+    payable_rent = property.determine_rent(player, board.colour_counts)
 
     if not property.owner:  # if the property doesn't have an owner
         # Determine whether or not to buy the property
@@ -78,12 +80,12 @@ def get_players(player_queue: queue):
     return p1, p2
 
 
-def generate_log(player1: InputGenerator.Player, player2: InputGenerator.Player):
+def generate_log(player1: Player.Player, player2: Player.Player):
     return f'{player1.position}, {player1.cash}, {player1.get_property_indices()}, ' \
            f'{player2.position}, {player2.cash}, {player2.get_property_indices()}'
 
 
-def run_game(file_handle, game_board: InputGenerator.Board, players: queue, rounds_per_game=1000):
+def run_game(file_handle, game_board: Board.Board, players: queue, rounds_per_game=1000):
     turns = 0
 
     # Get handles to the players of the game
@@ -101,7 +103,7 @@ def run_game(file_handle, game_board: InputGenerator.Board, players: queue, roun
         current_property = game_board.properties[current_position]
 
         # Make transaction decisions
-        stage2_transactions(player=current_player, property=current_property)
+        stage2_transactions(current_player, current_property, game_board)
 
         # If player runs out of money while paying rent, game is over.
         if current_player.cash < 0:
