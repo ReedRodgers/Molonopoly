@@ -16,7 +16,7 @@ class Network:
     #     return self.version
 
 
-    def load_from_weights(self):
+    def load(self):
         """Read in weight csv file"""
 
     def predict(self, players, me, board: Board):
@@ -24,10 +24,6 @@ class Network:
         return the expected value of the board"""
 
         return 0
-
-    def learn(self, prev, curr):
-        """applies learning by comparing previous estimate to current estimate"""
-
 
     def save(self):
         """saves weights as .csv"""
@@ -45,7 +41,7 @@ class Network:
         cash = np.array([player.cash])
         mtx = mtx.flatten()
 
-        return np.concatenate(cash, mtx)
+        return np.concatenate([cash, mtx])
 
     @staticmethod
     def arrange_input(player, others, board):
@@ -59,6 +55,6 @@ class Network:
         flattened_assets = Network.flatten_assets(player, shape, colour_dict)
         for other in others:
             assets = Network.flatten_assets(other, shape, colour_dict)
-            np.concatenate(flattened_assets, assets)
+            np.concatenate([flattened_assets, assets])
 
         return flattened_assets
