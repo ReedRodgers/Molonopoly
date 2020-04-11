@@ -1,6 +1,3 @@
-from InputGenerator import rent_check
-
-
 class Square:
     def __init__(self):
         self.colour = "BLACK"

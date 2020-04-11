@@ -16,15 +16,15 @@ class Board:
 #            self.unowned[idx] = True
 
     def get_colour_count(self):
-        colors = self.colour_counts
-        if len(colors) == 0:
+        colours = self.colour_counts
+        if len(colours) == 0:
             for prop in self.properties:
-                colors.update([prop.color])
+                colours.update([prop.colour])
 
-        return colors
+        return colours
 
     def get_colour_list(self):
-        return self.color_list
+        return self.colour_list
 
 
     def debug(self):

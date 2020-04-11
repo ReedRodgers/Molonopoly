@@ -1,14 +1,15 @@
 from Property import Property
-from Network import Network
+from EngineInterface import Engine
 
 
 class Player:
-    def __init__(self, cash, identifier, net: Network):
+    def __init__(self, cash, identifier, net: Engine):
         self.name = identifier
         self.cash = int(cash)
         self.properties = []   # Perhaps this should be a dictionary, with 4 keys corresponding to the colours
         self.position = 0
         self.network = net
+        self.value = 0
 
     def purchase(self, some_property: Property):
         self.cash -= some_property.cost
@@ -36,8 +37,18 @@ class Player:
                 output.append(int(p.index))
             return output
 
-    def decide_purchase(self, others, board):
-        self.network.predict(others, self, board)
+    def decide_purchase(self, others, prop, board):
+        current = self.network.predict(others, self, board)
+        self.properties.append(prop)
+        self.cash -= prop.cost
+        future = self.network.predict(others, self, board)
+        self.properties.pop()
+        self.cash += prop.cost
+        if current < future:
+            return True
+        else:
+            return False
+
 
     def __repr__(self):
         return f'{self.name}: ({self.cash}, {self.valuate()})'

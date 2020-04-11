@@ -1,12 +1,12 @@
-import Board
 from queue import Queue as queue
 from random import choice
 from time import time
 from uuid import uuid4
 
-import Player
-import Property
-
+from Board import Board
+from Player import Player
+from Property import Property
+from DenseNet import DenseNet
 
 def read_properties():
     """Generator function to read from csv"""
@@ -21,40 +21,41 @@ def import_properties():
     colour = ''
     for index, entry in enumerate(data):
         name, price, rent, col = entry.strip().split(",")
-        property_list.append(Property.Property(name=name, cost=price, colour=col, rent=rent, index=index))
+        property_list.append(Property(name=name, cost=price, colour=col, rent=rent, index=index))
         if colour != col:
             colour = col
             colour_list.append(col)
-    return property_list
+    return property_list, colour_list
 
 
-def initialize_stage2_game(player_count=2):
+def initialize_stage2_game(engines):
     """ Initialize the entire board and first player, as defined in Stage 1"""
     # Generate property list
     property_list, colour_list = import_properties()
 
     # Create board using the properties provided
-    board = Board.Board(property_list, colour_list)
+    board = Board(property_list, colour_list)
 
     # Spawn players with money, on the first tile of the board.
     players = queue()
-    for i in range(player_count):
-        new_player = Player.Player(cash=1500, identifier=f'Player{i + 1}')
+
+    for i, engine in enumerate(engines):
+        new_player = Player(1500, f'Player{i + 1}', engine)
         players.put(new_player)
         board.properties[0].players_present.append(new_player)
     return property_list, board, players
 
 
-def buy_property(player: Player.Player, others, property: Property.Property, board):
-    """Put the Network here"""
-    player.decide_purchase(others, property, board)
-    if choice([0, 1]) and player.cash > property.cost:
+def buy_property(player: Player, others, prop: Property, board):
+
+
+    if player.decide_purchase(others, prop, board) and player.cash > prop.cost:
         return True
     else:
         return False
 
 
-def stage2_transactions(player: Player.Player, property: Property.Property, board : Board.Board):
+def stage2_transactions(player: Player, others, property: Property, board: Board):
     """ In stage 2: there are two players """
 
     # Determine amount of payable rent
@@ -62,7 +63,7 @@ def stage2_transactions(player: Player.Player, property: Property.Property, boar
 
     if not property.owner:  # if the property doesn't have an owner
         # Determine whether or not to buy the property
-        if buy_property(player, property, rent=payable_rent):
+        if buy_property(player, others, property, board):
             player.purchase(property)  # Buy the property if NN says you should buy it
     else:
         player.pay_rent(fee=payable_rent)  # shouldn't make a difference if the player pays rent to himself
@@ -70,6 +71,7 @@ def stage2_transactions(player: Player.Player, property: Property.Property, boar
 
 
 def get_players(player_queue: queue):
+
     # Copy queue members (O(1) time)
     p1 = player_queue.get()
     p2 = player_queue.get()
@@ -80,12 +82,12 @@ def get_players(player_queue: queue):
     return p1, p2
 
 
-def generate_log(player1: Player.Player, player2: Player.Player):
+def generate_log(player1: Player, player2: Player):
     return f'{player1.position}, {player1.cash}, {player1.get_property_indices()}, ' \
            f'{player2.position}, {player2.cash}, {player2.get_property_indices()}'
 
 
-def run_game(file_handle, game_board: Board.Board, players: queue, rounds_per_game=1000):
+def run_game(file_handle, game_board: Board, players: queue, rounds_per_game=1000):
     turns = 0
 
     # Get handles to the players of the game
@@ -103,7 +105,9 @@ def run_game(file_handle, game_board: Board.Board, players: queue, rounds_per_ga
         current_property = game_board.properties[current_position]
 
         # Make transaction decisions
-        stage2_transactions(current_player, current_property, game_board)
+        p2 = players.get()
+        stage2_transactions(current_player, [p2], current_property, game_board)
+        players.put(p2)
 
         # If player runs out of money while paying rent, game is over.
         if current_player.cash < 0:
@@ -123,7 +127,9 @@ def run_game(file_handle, game_board: Board.Board, players: queue, rounds_per_ga
 
 def logged_simulation(file_handle):
     # Initialize board
-    properties, new_board, player_list = initialize_stage2_game()
+    network = DenseNet('first_try', [56, 20, 2])
+    engines = [network, network]
+    properties, new_board, player_list = initialize_stage2_game(engines)
 
     # Run game
     run_game(file_handle, new_board, players=player_list)
