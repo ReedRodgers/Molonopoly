@@ -112,6 +112,7 @@ def run_game(file_handle, game_board: Board, players: queue, rounds_per_game=300
             file_handle.write(generate_log(player1=person1, player2=person2) + "\n")
             person1.final_training([person2], game_board, turns)
             person2.final_training([person1], game_board, turns)
+            person2.network.save()
             return None
 
         # Add the player to the end of the queue
