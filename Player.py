@@ -9,15 +9,17 @@ class Player:
         self.properties = []   # Perhaps this should be a dictionary, with 4 keys corresponding to the colours
         self.position = 0
         self.network = net
-        self.value = 0
+        self.value = 0.0
 
     def purchase(self, some_property: Property):
         self.cash -= some_property.cost
         self.properties.append(some_property)
         some_property.owner = self
 
-    def pay_rent(self, fee: int):
-        self.cash -= int(fee)
+    def pay_rent(self, prop: Property, colour_counts):
+        fee = prop.determine_rent(self, colour_counts)
+        self.cash -= fee
+        prop.owner.cash += fee
 
     def valuate(self):
         # Account for cash
@@ -38,17 +40,20 @@ class Player:
             return output
 
     def decide_purchase(self, others, prop, board):
-        current = self.network.predict(others, self, board)
+        current = self.network.assess(others, self, board)
         self.properties.append(prop)
         self.cash -= prop.cost
         future = self.network.predict(others, self, board)
         self.properties.pop()
         self.cash += prop.cost
-        if current < future:
+        if current <= future:
             return True
         else:
             return False
 
+    def final_training(self, others, board, turns):
+        self.value = self.valuate() / turns
+        self.network.assess(others, self, board)
 
     def __repr__(self):
         return f'{self.name}: ({self.cash}, {self.valuate()})'

@@ -57,16 +57,13 @@ def buy_property(player: Player, others, prop: Property, board):
 
 def stage2_transactions(player: Player, others, property: Property, board: Board):
     """ In stage 2: there are two players """
-
-    # Determine amount of payable rent
-    payable_rent = property.determine_rent(player, board.colour_counts)
-
     if not property.owner:  # if the property doesn't have an owner
         # Determine whether or not to buy the property
         if buy_property(player, others, property, board):
             player.purchase(property)  # Buy the property if NN says you should buy it
     else:
-        player.pay_rent(fee=payable_rent)  # shouldn't make a difference if the player pays rent to himself
+        payable_rent = property.determine_rent(player, board.colour_counts)  # Determine amount of payable rent
+        player.pay_rent(property, board.colour_counts)  # shouldn't make a difference if the player pays rent to himself
     return None
 
 
@@ -87,7 +84,7 @@ def generate_log(player1: Player, player2: Player):
            f'{player2.position}, {player2.cash}, {player2.get_property_indices()}'
 
 
-def run_game(file_handle, game_board: Board, players: queue, rounds_per_game=1000):
+def run_game(file_handle, game_board: Board, players: queue, rounds_per_game=300):
     turns = 0
 
     # Get handles to the players of the game
@@ -113,6 +110,8 @@ def run_game(file_handle, game_board: Board, players: queue, rounds_per_game=100
         if current_player.cash < 0:
             # Log the results of the turn
             file_handle.write(generate_log(player1=person1, player2=person2) + "\n")
+            person1.final_training([person2], game_board, turns)
+            person2.final_training([person1], game_board, turns)
             return None
 
         # Add the player to the end of the queue
