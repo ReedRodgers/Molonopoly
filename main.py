@@ -28,32 +28,25 @@ def import_properties():
     return property_list, colour_list
 
 
-def initialize_stage2_game(engines):
+def initialize_board(engines, cash=1500):
     """ Initialize the entire board and first player, as defined in Stage 1"""
     # Generate property list
     property_list, colour_list = import_properties()
 
-    # Create board using the properties provided
-    board = Board(property_list, colour_list)
-
     # Spawn players with money, on the first tile of the board.
-    players = queue()
+    players = []
 
     for i, engine in enumerate(engines):
-        new_player = Player(1500, f'Player{i + 1}', engine)
-        players.put(new_player)
-        board.properties[0].players_present.append(new_player)
-    return property_list, board, players
+        new_player = Player(cash, f'Player{i + 1}', engine)
+        players.append(new_player)
+        property_list[-1].players_present.append(new_player)
+
+    # Create board using the properties provided
+    return Board(property_list, colour_list, players)
 
 
 def buy_property(player: Player, others, prop: Property, board):
-
-
-    if player.decide_purchase(others, prop, board) and player.cash > prop.cost:
-        return True
-    else:
-        return False
-
+    return player.decide_purchase(others, prop, board) and player.cash > prop.cost
 
 def stage2_transactions(player: Player, others, property: Property, board: Board):
     """ In stage 2: there are two players """
@@ -84,7 +77,7 @@ def generate_log(player1: Player, player2: Player):
            f'{player2.position}, {player2.cash}, {player2.get_property_indices()}'
 
 
-def run_game(file_handle, game_board: Board, players: queue, rounds_per_game=300):
+def run_game(file_handle, game_board: Board, players: queue, rounds_per_game=500):
     turns = 0
 
     # Get handles to the players of the game
@@ -129,7 +122,7 @@ def logged_simulation(file_handle):
     # Initialize board
     network = DenseNet('first_try', [56, 20, 2])
     engines = [network, network]
-    properties, new_board, player_list = initialize_stage2_game(engines)
+    properties, new_board, player_list = initialize_board(engines)
 
     # Run game
     run_game(file_handle, new_board, players=player_list)
@@ -141,6 +134,13 @@ if __name__ == '__main__':
     t0 = time()
     runs = 1000
 
+    #Define decision making engines to power players
+    network = DenseNet('first_try', [56, 20, 2])
+    engines = [network, network]
+
+    # Create board using the properties provided
+    board = initialize_board(engines)
+
     # Generate a UUID to avoid overwriting files that trained different NNs.
     output_file = "MoloSim_" + uuid4().hex[:5] + ".csv"
     with open(output_file, "w") as f:
@@ -151,7 +151,7 @@ if __name__ == '__main__':
         for n in range(runs):
             # Mark that a new game is about to be loaded
             f.write("=====" * 10 + " Simulated Game #{} ".format(n) + "=====" * 10 + "\n")
-            logged_simulation(f)
+            board.play(1000, None)
 
         f.write("====" * 10 + f'END OF REQUESTED SIMULATIONS; N = {runs}, elapsed_time = {time() - t0}')
         f.write("\n")

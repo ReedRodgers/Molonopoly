@@ -1,4 +1,4 @@
-from Board import Board
+# from Board import Board
 
 
 class Engine:
@@ -8,8 +8,13 @@ class Engine:
         self.previous = False  # Allows each player to use their own engine that references the same network
         # while passing the correct previous prediction for training
 
-    def predict(self, players, me, board: Board):
+    def predict(self, players, me, board):
 
+        self.previous = self.engine.predict(players, me, board, self.previous)
+
+        return self.previous
+
+    def assess(self, players, me, board):
         self.previous = self.engine.predict(players, me, board, self.previous)
 
         return self.previous
