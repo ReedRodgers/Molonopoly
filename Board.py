@@ -3,6 +3,7 @@ from random import randint
 from Player import Player
 from DenseNet import DenseNet
 from Property import Property
+from Game import Game
 import numpy as np
 
 
@@ -15,6 +16,7 @@ class Board:
         self.property_count = len(properties)
         self.colour_counts = Counter()
         self.colour_list = colour_list  # Stores ordered list of colours to maintain order for learning input
+        self.starting_cash = players[0].cash
 
         self.player_state = False
         self.player_order = False
@@ -106,10 +108,17 @@ class Board:
 
     def move_property(self, prop: Property, benefactor: Player, give: int):
         """Adds a property to a player's account and updates player_state for each player"""
-        benefactor.properties.append(prop)
-        prop.owner = benefactor
-        for player in self.players:
-            self.get_player_state(player)[0][self.get_property_index(prop, player)] = give
+        if give > 0:
+            benefactor.properties.append(prop)
+            prop.owner = benefactor
+            for player in self.players:
+                self.get_player_state(player)[0][self.get_property_index(prop, player)] = give
+        else:
+            for player in self.players:
+                self.get_player_state(player)[0][self.get_property_index(prop, player)] = give
+            benefactor.properties.remove(prop)
+            prop.owner = False
+
 
     def land(self, prop, player):
         if not prop.owner:  # if the property doesn't have an owner
@@ -124,8 +133,25 @@ class Board:
     #
     # def log(self, logger):
     #     logger.write()
+    def reset(self):
+        self.player_state = False
+        self.player_order = False
 
-    def play(self, max_cycles, logger):
+        for player in self.players:
+            player.properties = []
+            player.cash = self.starting_cash
+            player.position = -1
+
+        for prop in self.properties:
+            prop.owner = False
+            prop.players_present = []
+
+        self.properties[-1].players_present = [player for player in self.players]
+
+
+    def play(self, max_cycles, file):
+        game = Game(file)
+
         for cycle in range(max_cycles):
 
             for player in self.players:
@@ -133,9 +159,15 @@ class Board:
                 prop = self.properties[position]
                 self.land(prop, player)
 
-                # self.log(logger)
+                line = f'{cycle}.\t'
+                for p in self.players:
+                    line = line + f'{p.position} \t {p.cash} \t {p.get_property_indices()} \t || \t'
+                game.record(line)
 
                 if player.cash < 0:
                     for player in self.players:
                         player.final_training(self, cycle)
+
+                    self.reset()
+                    return game
 

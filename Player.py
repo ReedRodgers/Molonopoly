@@ -33,11 +33,7 @@ class Player:
     def get_property_indices(self):
         if not self.properties:
             return []
-        else:
-            output = []
-            for p in self.properties:
-                output.append(int(p.index))
-            return output
+        return [p.index for p in self.properties]
 
     def decide_purchase(self, prop, board):
         current = self.network.assess(self, board)
@@ -49,7 +45,7 @@ class Player:
         return current <= future
 
     def final_training(self, board, turns):
-        self.value = self.valuate() / turns
+        self.value = self.cash / turns
         self.network.assess(self, board)
         self.network.save()
 

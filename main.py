@@ -151,7 +151,8 @@ if __name__ == '__main__':
         for n in range(runs):
             # Mark that a new game is about to be loaded
             f.write("=====" * 10 + " Simulated Game #{} ".format(n) + "=====" * 10 + "\n")
-            board.play(1000, None)
+            game = board.play(1000, f)
+            game.write()
 
         f.write("====" * 10 + f'END OF REQUESTED SIMULATIONS; N = {runs}, elapsed_time = {time() - t0}')
         f.write("\n")
