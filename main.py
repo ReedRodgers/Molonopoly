@@ -157,3 +157,4 @@ if __name__ == '__main__':
         f.write("====" * 10 + f'END OF REQUESTED SIMULATIONS; N = {runs}, elapsed_time = {time() - t0}')
         f.write("\n")
 
+    network.save()

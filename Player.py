@@ -47,7 +47,6 @@ class Player:
     def final_training(self, board, turns):
         self.value = self.cash / turns
         self.network.assess(self, board)
-        self.network.save()
 
     def __repr__(self):
         return f'{self.name}: ({self.cash}, {self.valuate()})'
