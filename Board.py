@@ -119,20 +119,17 @@ class Board:
             benefactor.properties.remove(prop)
             prop.owner = False
 
-
     def land(self, prop, player):
         if not prop.owner:  # if the property doesn't have an owner
             # Determine whether or not to buy the property
             if player.decide_purchase(prop, self):
                 player.purchase(prop)  # Buy the property if NN says you should buy it
+
         else:
             rent = prop.determine_rent(player, self.colour_counts)  # Determine amount of payable rent
             self.deposit(0 - rent, player)  # shouldn't make a difference if the player pays rent to himself
             self.deposit(rent, prop.owner)
-        return None
-    #
-    # def log(self, logger):
-    #     logger.write()
+
     def reset(self):
         self.player_state = False
         self.player_order = False
@@ -147,7 +144,6 @@ class Board:
             prop.players_present = []
 
         self.properties[-1].players_present = [player for player in self.players]
-
 
     def play(self, max_cycles, file):
         game = Game(file)
@@ -169,5 +165,6 @@ class Board:
                         player.final_training(self, cycle)
 
                     self.reset()
-                    return game
+                    game.write()
+                    return None
 

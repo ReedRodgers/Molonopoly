@@ -8,6 +8,7 @@ class DenseNet:
     def __init__(self, name, layers=None):
         self.name = name
         self.layers = layers
+        self.loss = 0
         if layers is not None:  # Build a new dense model given different layers
             self.model = False
         else:
@@ -38,7 +39,7 @@ class DenseNet:
         prediction = self.predict(me, board)
         board_state = board.get_player_state(me)
         previous = np.array([[me.value]])
-        self.model.train_on_batch(board_state, previous)
+        self.loss = self.model.train_on_batch(board_state, previous)
 
         return prediction
 
@@ -46,7 +47,7 @@ class DenseNet:
         self.model.save(self.name)
 
     def load(self):
-        self.model = tf.model.load_model(self.name)
+        self.model = tf.keras.models.load_model(self.name)
 
     @staticmethod
     def flatten_assets(player, length):

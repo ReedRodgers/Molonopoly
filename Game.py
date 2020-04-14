@@ -1,5 +1,6 @@
 import json
 
+
 class Game:
     def __init__(self, file):
         self.states = []

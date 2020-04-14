@@ -14,7 +14,7 @@ class Engine:
 
         return self.previous
 
-    def assess(self, players, me, board):
-        self.previous = self.engine.predict(players, me, board, self.previous)
+    def assess(self, me, board):
+        self.previous = self.engine.assess(me, board, self.previous)
 
         return self.previous

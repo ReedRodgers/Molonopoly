@@ -1,15 +1,17 @@
 from Property import Property
 from EngineInterface import Engine
+from Logger import Logger
 
 
 class Player:
-    def __init__(self, cash, identifier, net: Engine):
+    def __init__(self, cash, identifier, net: Engine, logger: Logger):
         self.name = identifier
         self.cash = int(cash)
         self.properties = []   # Perhaps this should be a dictionary, with 4 keys corresponding to the colours
         self.position = -1
         self.network = net
-        self.value = 0.0
+        self.value = cash
+        self.logger = logger
 
     def purchase(self, some_property: Property):
         self.cash -= some_property.cost
@@ -42,7 +44,12 @@ class Player:
         future = self.network.predict(self, board)
         board.move_property(prop, self, 0)  # Undo property buy
         board.deposit(prop.cost, self)
-        return current <= future
+        loss = self.network.loss
+        if current <= future:
+            self.logger.turn(loss, future[0][0], len(self.properties) + 1)
+            return True
+        self.logger.turn(loss, current[0][0], len(self.properties))
+        return False
 
     def final_training(self, board, turns):
         self.value = self.cash / turns
