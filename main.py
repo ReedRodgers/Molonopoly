@@ -121,7 +121,7 @@ def initialize_board(engines, loggers, cash=1500):
 if __name__ == '__main__':
     # For benchmarking purposes
     t0 = time()
-    runs = 100
+    runs = 50
 
     #Define decision making engines to power players
     network1 = DenseNet('second_try', [28, 2])
@@ -151,14 +151,21 @@ if __name__ == '__main__':
         f.write("====" * 10 + f'END OF REQUESTED SIMULATIONS; N = {runs}, elapsed_time = {time() - t0}')
         f.write("\n")
 
-    for player in board.players:
+    for i, player in enumerate(board.players):
+        ax1 = plt.subplot(len(board.players), 2, i * 2 + 1)
+
         player.network.save()
         results = player.logger.per_turn_metrics
-        plt.title(player.name + ' loss')
-        plt.plot(results['loss'])
-        plt.plot(results['properties'])
-        plt.show()
-        plt.title(player.name + ' value')
-        plt.plot(results['properties'])
-        plt.plot(results['value'])
-        plt.show()
+
+        ax1.set_title(player.name + ' loss')
+        ax1.plot(results['loss'])
+        ax1_2 = ax1.twinx()
+        ax1_2.plot(results['properties'], color='green')
+
+        ax2 = plt.subplot(len(board.players), 2, i * 2 + 2)
+        ax2.set_title(player.name + ' value')
+        # ax2.plot(results['properties'], color='green')
+        # ax2_2 = ax1.twinx()
+        ax2.plot(results['value'])
+
+    plt.show()

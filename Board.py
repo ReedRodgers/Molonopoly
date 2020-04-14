@@ -138,6 +138,7 @@ class Board:
             player.properties = []
             player.cash = self.starting_cash
             player.position = -1
+            player.value = player.cash
 
         for prop in self.properties:
             prop.owner = False
