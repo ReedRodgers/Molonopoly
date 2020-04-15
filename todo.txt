@@ -1,0 +1,3 @@
+## To Do (Ishan, April 9th)
+- Need to integrate NN with learning rule
+- Need to fix bugs in the audit_properties file(s)- it's super close to working!
