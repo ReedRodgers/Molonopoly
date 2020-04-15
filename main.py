@@ -1,4 +1,4 @@
-from queue import Queue as queue
+from Heuristic import Heuristic
 from matplotlib import pyplot as plt
 from Logger import Logger
 from time import time
@@ -46,86 +46,15 @@ def initialize_board(engines, loggers, cash=1500):
     return Board(property_list, colour_list, players)
 
 
-# def buy_property(player: Player, others, prop: Property, board):
-#     return player.decide_purchase(others, prop, board) and player.cash > prop.cost
-
-# def stage2_transactions(player: Player, others, property: Property, board: Board):
-#     """ In stage 2: there are two players """
-#     if not property.owner:  # if the property doesn't have an owner
-#         # Determine whether or not to buy the property
-#         if buy_property(player, others, property, board):
-#             player.purchase(property)  # Buy the property if NN says you should buy it
-#     else:
-#         payable_rent = property.determine_rent(player, board.colour_counts)  # Determine amount of payable rent
-#         player.pay_rent(property, board.colour_counts)  # shouldn't make a difference if the player pays rent to himself
-#     return None
-
-#
-# def generate_log(player1: Player, player2: Player):
-#     return f'{player1.position}, {player1.cash}, {player1.get_property_indices()}, ' \
-#            f'{player2.position}, {player2.cash}, {player2.get_property_indices()}'
-
-
-# def run_game(file_handle, game_board: Board, players: queue, rounds_per_game=500):
-#     turns = 0
-#
-#     # Get handles to the players of the game
-#     person1, person2 = get_players(players)
-#
-#     # First log to describe initial state
-#     file_handle.write(generate_log(player1=person1, player2=person2) + "\n")
-#
-#     while turns < rounds_per_game * players.qsize():
-#         # Who's turn is it?
-#         current_player = players.get()
-#
-#         # Roll the dice, and move the player accordingly
-#         current_position = game_board.roll(current_player)
-#         current_property = game_board.properties[current_position]
-#
-#         # Make transaction decisions
-#         p2 = players.get()
-#         stage2_transactions(current_player, [p2], current_property, game_board)
-#         players.put(p2)
-#
-#         # If player runs out of money while paying rent, game is over.
-#         if current_player.cash < 0:
-#             # Log the results of the turn
-#             file_handle.write(generate_log(player1=person1, player2=person2) + "\n")
-#             person1.final_training([person2], game_board, turns)
-#             person2.final_training([person1], game_board, turns)
-#             person2.network.save()
-#             return None
-#
-#         # Add the player to the end of the queue
-#         players.put(current_player)
-#
-#         # Log the results of the turn
-#         file_handle.write(generate_log(player1=person1, player2=person2) + "\n")
-#
-#         # Mark turn as done
-#         turns += 1
-
-
-# def logged_simulation(file_handle):
-#     # Initialize board
-#     network = DenseNet('first_try', [56, 20, 2])
-#     engines = [network, network]
-#     properties, new_board, player_list = initialize_board(engines)
-#
-#     # Run game
-#     run_game(file_handle, new_board, players=player_list)
-#     return None
-
-
 if __name__ == '__main__':
     # For benchmarking purposes
     t0 = time()
-    runs = 50
+    runs = 500
 
     #Define decision making engines to power players
-    network1 = DenseNet('second_try', [28, 2])
-    network2 = DenseNet('first_try')
+    # network1 = DenseNet('second_try')#, [28, 2]
+    network1 = Heuristic()
+    network2 = DenseNet('first_try')#, [56, 28, 2]
     engines = [network1, network2]
 
     p1_logger = Logger()
@@ -146,26 +75,43 @@ if __name__ == '__main__':
             # Mark that a new game is about to be loaded
             f.write('\n' + "=====" * 10 + " Simulated Game #{} ".format(n) + "=====" * 10 + "\n")
             board.play(500, f)
-            # game.write()
 
         f.write("====" * 10 + f'END OF REQUESTED SIMULATIONS; N = {runs}, elapsed_time = {time() - t0}')
         f.write("\n")
 
     for i, player in enumerate(board.players):
-        ax1 = plt.subplot(len(board.players), 2, i * 2 + 1)
 
         player.network.save()
         results = player.logger.per_turn_metrics
 
+        ax1 = plt.subplot(len(board.players), 3, i * 3 + 1)
         ax1.set_title(player.name + ' loss')
         ax1.plot(results['loss'])
-        ax1_2 = ax1.twinx()
-        ax1_2.plot(results['properties'], color='green')
 
-        ax2 = plt.subplot(len(board.players), 2, i * 2 + 2)
+        ax2 = plt.subplot(len(board.players), 3, i * 3 + 2)
         ax2.set_title(player.name + ' value')
-        # ax2.plot(results['properties'], color='green')
-        # ax2_2 = ax1.twinx()
         ax2.plot(results['value'])
+
+        ax3 = plt.subplot(len(board.players), 3, i * 3 + 3)
+        ax3.plot(results['properties'])
+        ax3.set_title(player.name + ' properties')
+
+    plt.show()
+
+    for i, player in enumerate(board.players):
+
+        results = player.logger.game_metrics
+
+        ax1 = plt.subplot(len(board.players), 3, i * 3 + 1)
+        ax1.set_title(player.name + ' loss')
+        ax1.plot(results['loss'])
+
+        ax2 = plt.subplot(len(board.players), 3, i * 3 + 2)
+        ax2.set_title(player.name + ' value')
+        ax2.plot(results['value'])
+
+        ax3 = plt.subplot(len(board.players), 3, i * 3 + 3)
+        ax3.set_title(player.name + ' assessment')
+        ax3.plot(results['assessment'])
 
     plt.show()

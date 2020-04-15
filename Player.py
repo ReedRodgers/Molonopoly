@@ -41,6 +41,8 @@ class Player:
         current = self.network.assess(self, board)
         board.move_property(prop, self, 1)  # Simulate property buy
         board.deposit(0-prop.cost, self)
+        if self.cash < 0:
+            print('op')
         future = self.network.predict(self, board)
         board.move_property(prop, self, 0)  # Undo property buy
         board.deposit(prop.cost, self)
@@ -53,7 +55,8 @@ class Player:
 
     def final_training(self, board, turns):
         self.value = self.cash / turns
-        self.network.assess(self, board)
+        assessment = self.network.assess(self, board)[0][0]
+        self.logger.game(self.network.loss, self.value, assessment)
 
     def __repr__(self):
         return f'{self.name}: ({self.cash}, {self.valuate()})'

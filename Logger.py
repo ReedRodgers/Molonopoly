@@ -4,7 +4,7 @@ class Logger:
                                  'value': [],
                                  'properties': []}
         self.game_metrics = {'loss': [],
-                             'self_inflicted': [],
+                             'assessment': [],
                              'value': []}
 
     def turn(self, loss, value, properties):
@@ -12,7 +12,7 @@ class Logger:
         self.per_turn_metrics['value'].append(value)
         self.per_turn_metrics['properties'].append(properties)
 
-    def game(self, loss, value, inflicted):
+    def game(self, loss, value, assessment):
         self.game_metrics['loss'].append(loss)
         self.game_metrics['value'].append(value)
-        self.game_metrics['self_inflicted'].append(inflicted)
+        self.game_metrics['assessment'].append(assessment)
