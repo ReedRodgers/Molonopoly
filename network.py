@@ -125,7 +125,7 @@ def train(property_combos, board: Board):
     ])
     print('compile')
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=.1),
-                  loss=loss#,
+                  loss='mean_squared_error'#,
                   # metrics=[accuracy]
                   )
     print('fit')
