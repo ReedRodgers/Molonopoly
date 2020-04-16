@@ -5,13 +5,6 @@ This file is responsible for generating input for the NN.
 Step 1: evaluate the value of different combinations of properties
 '''
 
-
-class Property:
-    def __init__(self, cost, color):
-        self.cost = cost
-        self.color = color
-
-
 class Board:
     def __init__(self, properties):
         self.properties = properties

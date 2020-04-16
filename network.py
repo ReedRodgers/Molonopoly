@@ -92,8 +92,8 @@ def apply_heuristic(x_values, board: Board):
 def loss(y_true, y_predict):
     return (y_true - y_predict)**2
 
-def accuracy(y_true, y_predict):
-    return math.log(1/abs(y_true - y_predict), 10)
+# def accuracy(y_true, y_predict):
+#     return math.log(1/abs(y_true - y_predict), 10)
 
 
 def train(property_combos, board: Board):
@@ -107,28 +107,31 @@ def train(property_combos, board: Board):
     training_combos = [property_combos[i] for i in training]
     testing_combos = [property_combos[i] for i in testing]
 
+    print('converting combos to input')
     x_train = read_board(training_combos, board)
+    print('applying heuristic to combos')
     y_train = apply_heuristic(training_combos, board)
 
+    print('the same but for testing')
     x_test = read_board(testing_combos, board)
     y_test = apply_heuristic(testing_combos, board)
 
     color_counts = board.get_colors()
     breadth = len(color_counts)
     depth = color_counts.most_common()[0][1]
-
+    print('create model')
     model = tf.keras.models.Sequential([
         tf.keras.layers.Input(shape=(breadth * depth + 1,)),
         tf.keras.layers.Dense(breadth + depth, activation='relu'),
         tf.keras.layers.Dense(breadth + 1, activation='relu'),
         tf.keras.layers.Dense(1, activation='relu')
     ])
-
+    print('compile')
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=.1),
-                  loss=loss,
-                  metrics=[accuracy]
+                  loss=loss#,
+                  # metrics=[accuracy]
                   )
-
+    print('fit')
     model.fit(np.array(x_train), np.array(y_train), epochs=25, validation_data=(np.array(x_test), np.array(y_test)))
 
     return model
