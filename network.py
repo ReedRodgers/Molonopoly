@@ -8,19 +8,16 @@ import math
 
 def read_board(combos, board: Board):
     """Given property cash combos from InputGenerator, return array datatype for learning"""
-    color_counts = board.get_colors()
-    breadth = len(color_counts)
-    depth = color_counts.most_common()[0][1]
     color_list = board.get_color_list()
     color_dict = {color: i for i, color in enumerate(color_list)}
     data = []
     for combo in combos:
-        mtx = np.zeros([breadth, depth], dtype=int)
+        mtx = np.zeros([len(board.properties)], dtype=int)
         color_count = Counter(color_list)
         color_count.subtract(color_list)
         for prop in combo['properties']:
             color = prop.color
-            mtx[color_dict[color], color_count[color]] = 1
+            mtx[prop.index] = 1
             color_count.update([color])
         cash = np.array([combo['cash']])
         ls = mtx.flatten()
@@ -121,7 +118,7 @@ def train(property_combos, board: Board):
     depth = color_counts.most_common()[0][1]
     print('create model')
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Input(shape=(breadth * depth + 1,)),
+        tf.keras.layers.Input(shape=(len(board.properties) + 1,)),
         tf.keras.layers.Dense(breadth + depth, activation='relu'),
         tf.keras.layers.Dense(breadth + 1, activation='relu'),
         tf.keras.layers.Dense(1, activation='relu')
